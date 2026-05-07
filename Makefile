@@ -7,10 +7,6 @@ NEXT_DIR := manji-standard-server-ts-next
 
 ALL_DIRS := $(GO_DIR) $(HONO_DIR) $(NEXT_DIR)
 
-CLAUDE_DIR := .claude
-SKILLS_DST := $(CLAUDE_DIR)/skills
-AGENTS_DST := $(CLAUDE_DIR)/agents
-
 GREEN  := \033[0;32m
 YELLOW := \033[0;33m
 RED    := \033[0;31m
@@ -18,7 +14,7 @@ NC     := \033[0m
 
 .DEFAULT_GOAL := help
 .PHONY: help init-go init-hono init-next _clean-except _docs-init \
-        install-skills doctor go-% hono-% next-%
+        go-% hono-% next-%
 
 help: ## ターゲット一覧
 	@grep -E '^[a-zA-Z_%/-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -26,25 +22,22 @@ help: ## ターゲット一覧
 
 # ── 言語別セットアップ ────────────────────────────────────────────
 
-init-go: ## Go BE 構成に一括初期化（Hono/Next 削除 + skills 配置 + docs 初期化）
+init-go: ## Go BE 構成に一括初期化（Hono/Next 削除 + docs 初期化）
 	@$(MAKE) _clean-except KEEP_DIR=$(GO_DIR)
-	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(GO_DIR)
 	@cp $(MSS_DIR)/makefiles/makefile-slim-go.mk Makefile
 	@rm -rf $(MSS_DIR)
 	@printf "$(GREEN)✔$(NC) init-go 完了 — $(GO_DIR)/ で開発を始めてください\n"
 
-init-hono: ## Hono TS 構成に一括初期化（Go/Next 削除 + skills 配置 + docs 初期化）
+init-hono: ## Hono TS 構成に一括初期化（Go/Next 削除 + docs 初期化）
 	@$(MAKE) _clean-except KEEP_DIR=$(HONO_DIR)
-	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(HONO_DIR)
 	@cp $(MSS_DIR)/makefiles/makefile-slim-hono.mk Makefile
 	@rm -rf $(MSS_DIR)
 	@printf "$(GREEN)✔$(NC) init-hono 完了 — $(HONO_DIR)/ で開発を始めてください\n"
 
-init-next: ## Next.js TS 構成に一括初期化（Go/Hono 削除 + skills 配置 + docs 初期化）
+init-next: ## Next.js TS 構成に一括初期化（Go/Hono 削除 + docs 初期化）
 	@$(MAKE) _clean-except KEEP_DIR=$(NEXT_DIR)
-	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(NEXT_DIR)
 	@cp $(MSS_DIR)/makefiles/makefile-slim-next.mk Makefile
 	@rm -rf $(MSS_DIR)
@@ -72,27 +65,6 @@ _docs-init:
 		else printf "  exists:  $$dir/\n"; fi; \
 	done
 	@printf "$(GREEN)✔$(NC) docs layout ready\n"
-
-install-skills: ## manji-standard-server/ の skills + agents を .claude/ に配置
-	@$(MAKE) -f $(MSS_DIR)/Makefile install SOURCE_DIR=$(MSS_DIR)
-
-# ── 診断 ──────────────────────────────────────────────────────────
-
-doctor: ## プロジェクト構成の状態を診断
-	@printf "\n  pachipachi-manager doctor\n  =========================\n\n"
-	@for d in $(ALL_DIRS); do \
-		[ -d $$d ] \
-			&& printf "  $(GREEN)✔$(NC) $$d/\n" \
-			|| printf "  $(YELLOW)-$(NC) $$d/ (削除済み)\n"; \
-	done
-	@printf "\n"
-	@[ -d $(SKILLS_DST) ] \
-		&& printf "  $(GREEN)✔$(NC) skills : $(SKILLS_DST)/ ($$(ls -1 $(SKILLS_DST) 2>/dev/null | wc -l | tr -d ' ') 個)\n" \
-		|| printf "  $(YELLOW)⚠$(NC) $(SKILLS_DST)/ なし → make install-skills\n"
-	@[ -d $(AGENTS_DST) ] \
-		&& printf "  $(GREEN)✔$(NC) agents : $(AGENTS_DST)/ ($$(ls -1 $(AGENTS_DST) 2>/dev/null | wc -l | tr -d ' ') 個)\n" \
-		|| printf "  $(YELLOW)⚠$(NC) $(AGENTS_DST)/ なし → make install-skills\n"
-	@printf "\n"
 
 # ── 各プロジェクトへのパススルー ──────────────────────────────────
 
