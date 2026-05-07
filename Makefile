@@ -30,7 +30,7 @@ init-go: ## Go BE 構成に一括初期化（Hono/Next 削除 + skills 配置 + 
 	@$(MAKE) _clean-except KEEP_DIR=$(GO_DIR)
 	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(GO_DIR)
-	@cp $(MSS_DIR)/makefile-slim-go.mk Makefile
+	@cp $(MSS_DIR)/makefiles/makefile-slim-go.mk Makefile
 	@rm -rf $(MSS_DIR)
 	@printf "$(GREEN)✔$(NC) init-go 完了 — $(GO_DIR)/ で開発を始めてください\n"
 
@@ -38,7 +38,7 @@ init-hono: ## Hono TS 構成に一括初期化（Go/Next 削除 + skills 配置 
 	@$(MAKE) _clean-except KEEP_DIR=$(HONO_DIR)
 	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(HONO_DIR)
-	@cp $(MSS_DIR)/makefile-slim-hono.mk Makefile
+	@cp $(MSS_DIR)/makefiles/makefile-slim-hono.mk Makefile
 	@rm -rf $(MSS_DIR)
 	@printf "$(GREEN)✔$(NC) init-hono 完了 — $(HONO_DIR)/ で開発を始めてください\n"
 
@@ -46,7 +46,7 @@ init-next: ## Next.js TS 構成に一括初期化（Go/Hono 削除 + skills 配�
 	@$(MAKE) _clean-except KEEP_DIR=$(NEXT_DIR)
 	@$(MAKE) install-skills
 	@$(MAKE) _docs-init IMPL_DIR=$(NEXT_DIR)
-	@cp $(MSS_DIR)/makefile-slim-next.mk Makefile
+	@cp $(MSS_DIR)/makefiles/makefile-slim-next.mk Makefile
 	@rm -rf $(MSS_DIR)
 	@printf "$(GREEN)✔$(NC) init-next 完了 — $(NEXT_DIR)/ で開発を始めてください\n"
 
