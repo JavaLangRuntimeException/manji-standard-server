@@ -20,14 +20,14 @@ type ErrorWriter interface {
 }
 
 var errorTypeTitle = map[ErrorType]string{
-	ErrorTypeValidation:   "Validation Error",
+	ErrorTypeValidation:   "Unprocessable Entity",
 	ErrorTypeNotFound:     "Not Found",
 	ErrorTypeDuplicate:    "Conflict",
 	ErrorTypeUnauthorized: "Unauthorized",
 	ErrorTypeForbidden:    "Forbidden",
 	ErrorTypeBadRequest:   "Bad Request",
 	ErrorTypeInternal:     "Internal Server Error",
-	ErrorTypeDatabase:     "Service Unavailable",
+	ErrorTypeConcurrency:  "Service Unavailable",
 }
 
 type problemWriter struct{}

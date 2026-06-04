@@ -55,9 +55,9 @@ func (w *rdbErrorWrapper) Wrap(resource string, err error) *DomainError {
 		}
 		return de
 	case w.checker.IsSerializationFailureError(err):
-		return New(ErrorTypeDatabase, fmt.Sprintf("serialization failure in %s", resource))
+		return New(ErrorTypeConcurrency, fmt.Sprintf("serialization failure in %s", resource))
 	case w.checker.IsDeadlockDetectedError(err):
-		return New(ErrorTypeDatabase, fmt.Sprintf("deadlock detected in %s", resource))
+		return New(ErrorTypeConcurrency, fmt.Sprintf("deadlock detected in %s", resource))
 	default:
 		return New(ErrorTypeInternal, fmt.Sprintf("unexpected error in %s", resource))
 	}

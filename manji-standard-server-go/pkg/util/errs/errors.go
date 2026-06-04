@@ -22,7 +22,7 @@ const (
 	ErrorTypeForbidden    ErrorType = "FORBIDDEN"
 	ErrorTypeBadRequest   ErrorType = "BAD_REQUEST"
 	ErrorTypeInternal     ErrorType = "INTERNAL_ERROR"
-	ErrorTypeDatabase     ErrorType = "DATABASE_ERROR"
+	ErrorTypeConcurrency  ErrorType = "CONCURRENCY_ERROR"
 )
 
 type DomainError struct {
@@ -42,7 +42,9 @@ func New(errType ErrorType, message string) *DomainError {
 		Message: message,
 	}
 	switch errType {
-	case ErrorTypeValidation, ErrorTypeBadRequest:
+	case ErrorTypeValidation:
+		e.StatusCode = http.StatusUnprocessableEntity
+	case ErrorTypeBadRequest:
 		e.StatusCode = http.StatusBadRequest
 	case ErrorTypeNotFound:
 		e.StatusCode = http.StatusNotFound
@@ -52,6 +54,8 @@ func New(errType ErrorType, message string) *DomainError {
 		e.StatusCode = http.StatusForbidden
 	case ErrorTypeDuplicate:
 		e.StatusCode = http.StatusConflict
+	case ErrorTypeConcurrency:
+		e.StatusCode = http.StatusServiceUnavailable
 	default:
 		e.StatusCode = http.StatusInternalServerError
 	}
