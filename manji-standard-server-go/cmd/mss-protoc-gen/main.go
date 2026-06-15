@@ -731,8 +731,10 @@ func buildServiceTpl(svc *protogen.Service, f *protogen.File, entities map[proto
 				for _, of := range output.Fields {
 					collectReferencedNonEntityTypes(of, entities, nonEntityTypeByName, resolve)
 				}
+				// Output が entity を参照するフィールドは DTO 型（*dto.XDTO）として emit する
+				// （outputGoType 参照）。よって entity ではなく dto package の import が必要。
 				if outputUsesEntity(output, entities) {
-					s.AnyUsesEntity = true
+					s.AnyReturnsEntity = true
 				}
 				s.AnyReturnsOutput = true
 			}
@@ -780,9 +782,26 @@ type nonEntityResolver func(*protogen.Message) string
 func buildOutputField(f *protogen.Field, entities map[protoreflect.FullName]*entitySpec, resolve nonEntityResolver) tplOutputField {
 	return tplOutputField{
 		GoName:  normalizeInitialisms(f.GoName),
-		GoType:  goTypeFromMessageField(f, entities, resolve),
+		GoType:  outputGoType(f, entities, resolve),
 		JsonTag: string(f.Desc.Name()),
 	}
+}
+
+// outputGoType は JSON レスポンスに乗る struct（Output struct / 非 entity 中間 struct）の
+// フィールド Go 型を解決する。entity を参照するフィールドは **DTO 型**（*dto.XDTO / []*dto.XDTO）に
+// マップする。entity は gorm タグのみで json タグを持たないため、そのまま埋めると PascalCase で
+// シリアライズされてしまう。DTO 境界（クライアント JSON 表現は DTO が一元管理）に合わせるための変換。
+// entity 以外（scalar / 非 entity message / map）は goTypeFromMessageField に委譲する。
+func outputGoType(f *protogen.Field, entities map[protoreflect.FullName]*entitySpec, resolve nonEntityResolver) string {
+	if !f.Desc.IsMap() && f.Desc.Kind() == protoreflect.MessageKind && f.Message != nil {
+		if ent, ok := entities[f.Message.Desc.FullName()]; ok {
+			if f.Desc.IsList() {
+				return "[]*dto." + ent.Name + "DTO"
+			}
+			return "*dto." + ent.Name + "DTO"
+		}
+	}
+	return goTypeFromMessageField(f, entities, resolve)
 }
 
 // goTypeFromMessageField は Input / Output struct のフィールド型を解決する。
